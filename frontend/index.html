@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Tasks</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 640px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        form {
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 8px;
+        }
+
+        button {
+            padding: 8px 12px;
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #task-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+<h1>Focus Tasks</h1>
+
+<form id="task-form">
+    <input
+            id="task-title"
+            type="text"
+            placeholder="What needs doing?"
+            required
+            maxlength="200"
+    >
+    <button type="submit">Add task</button>
+</form>
+
+<p id="message"></p>
+<ul id="task-list"></ul>
+
+<script>
+    const form = document.getElementById("task-form");
+    const titleInput = document.getElementById("task-title");
+    const taskList = document.getElementById("task-list");
+    const message = document.getElementById("message");
+
+    async function loadTasks() {
+        const response = await fetch("/api/tasks");
+        const tasks = await response.json();
+
+        taskList.innerHTML = "";
+
+        for (const task of tasks) {
+            const item = document.createElement("li");
+            const checkbox = document.createElement("input");
+            const label = document.createElement("label");
+
+            checkbox.type = "checkbox";
+            checkbox.checked = task.completed;
+
+            label.textContent = task.title;
+
+            if (task.completed) {
+                label.classList.add("completed");
+            }
+
+            checkbox.addEventListener("change", async () => {
+                await fetch(`/api/tasks/${task.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        completed: checkbox.checked
+                    })
+                });
+
+                await loadTasks();
+            });
+
+            item.appendChild(checkbox);
+            item.appendChild(document.createTextNode(" "));
+            item.appendChild(label);
+            taskList.appendChild(item);
+        }
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const response = await fetch("/api/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: titleInput.value })
+        });
+
+        if (!response.ok) {
+            message.textContent = "Could not create task.";
+            return;
+        }
+
+        titleInput.value = "";
+        message.textContent = "";
+        await loadTasks();
+    });
+
+    loadTasks();
+</script>
+</body>
+</html>
