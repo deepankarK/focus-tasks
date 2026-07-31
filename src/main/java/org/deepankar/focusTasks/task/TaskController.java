@@ -6,8 +6,11 @@ import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import java.util.List;
 
+@CrossOrigin(origins = "https://deepankark.github.io")
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
