@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.List;
 
-@CrossOrigin(origins = "https://deepankark.github.io")
+@CrossOrigin(origins = "https://focus-tasks.onrender.com")
 @RestController
 @RequestMapping("/tasks")
 public class TaskController {
